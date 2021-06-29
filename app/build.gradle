@@ -16,6 +16,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -31,10 +32,6 @@ android {
         returnDefaultValues = true
     }
 
-    //dataBinding {
-    //    enabled = true
-    //    enabledForTests = true
-    //}
     buildFeatures {
         dataBinding true
     }
@@ -53,6 +50,7 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout:$constraintVersion"
 
     implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.firebaseui:firebase-ui-auth:6.4.0'
 
     // Architecture Components
     //Navigation dependencies

@@ -8,4 +8,16 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="FirebaseTheme" parent="FirebaseUI">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">@color/light_grey</item>
+        <item name="android:editTextColor">@color/light_grey</item>
+        <item name="android:textColorHint">@color/light_grey</item>
+        <item name="colorControlNormal">@color/light_grey</item>
+        <item name="android:windowAnimationStyle">@null</item>
+        <item name="android:windowBackground">@drawable/background_auth_picker</item>
+    </style>
+
 </resources>
