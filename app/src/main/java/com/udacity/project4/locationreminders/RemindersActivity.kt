@@ -35,7 +35,7 @@ class RemindersActivity : AppCompatActivity() {
 
         pref = getSharedPreferences("com.udacity.project4", MODE_PRIVATE)
 
-        // 로그인이 안되었을때
+        // When not logged in
         if(pref.getString(EMAIL, "").isNullOrEmpty()) {
             val authIntent = Intent(this, AuthenticationActivity::class.java)
             startActivityForResult(authIntent, AUTH_REQUEST)

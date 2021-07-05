@@ -1,8 +1,18 @@
 package com.udacity.project4.locationreminders.geofence
 
+import android.app.Notification
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.Geofence
+import com.google.android.gms.location.GeofenceStatusCodes
+import com.google.android.gms.location.GeofencingEvent
+import com.google.gson.Gson
+import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
+import com.udacity.project4.utils.sendNotification
 
 /**
  * Triggered by the Geofence.  Since we can have many Geofences at once, we pull the request
@@ -15,9 +25,32 @@ import android.content.Intent
  */
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
+    val TAG = "GeofenceBroadcast"
+
     override fun onReceive(context: Context, intent: Intent) {
 
-//TODO: implement the onReceive method to receive the geofencing events at the background
+        //TODO: implement the onReceive method to receive the geofencing events at the background
+        val geofencingEvent = GeofencingEvent.fromIntent(intent)
+        val reminderDataItem = ReminderDataItem(
+            intent.getStringExtra("title"),
+            intent.getStringExtra("description"),
+            intent.getStringExtra("location"),
+            intent.getDoubleExtra("latitude", 0.0),
+            intent.getDoubleExtra("longitude", 0.0),
+            intent.getStringExtra("id") ?: "null"
+        )
+        Log.i(TAG, "reminderDataItem: $reminderDataItem")
+        if(geofencingEvent.hasError()) {
+            val errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.errorCode)
+            Log.e(TAG, errorMessage)
+            return
+        }
 
+        // transition Type
+        val geofenceTransition = geofencingEvent.geofenceTransition
+
+        if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+            sendNotification(context, reminderDataItem)
+        }
     }
 }
