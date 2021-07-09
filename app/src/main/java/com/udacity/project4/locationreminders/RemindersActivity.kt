@@ -25,6 +25,7 @@ class RemindersActivity : AppCompatActivity() {
     companion object {
         const val AUTH_REQUEST = 1
         const val EMAIL = "EMAIL"
+        const val PACKAGE_NAME = "com.udacity.project4"
     }
 
     lateinit var pref: SharedPreferences
@@ -33,7 +34,7 @@ class RemindersActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_reminders)
 
-        pref = getSharedPreferences("com.udacity.project4", MODE_PRIVATE)
+        pref = getSharedPreferences(PACKAGE_NAME, MODE_PRIVATE)
 
         // When not logged in
         if(pref.getString(EMAIL, "").isNullOrEmpty()) {
