@@ -29,28 +29,8 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
 
-        //TODO: implement the onReceive method to receive the geofencing events at the background
-        val geofencingEvent = GeofencingEvent.fromIntent(intent)
-        val reminderDataItem = ReminderDataItem(
-            intent.getStringExtra("title"),
-            intent.getStringExtra("description"),
-            intent.getStringExtra("location"),
-            intent.getDoubleExtra("latitude", 0.0),
-            intent.getDoubleExtra("longitude", 0.0),
-            intent.getStringExtra("id") ?: "null"
-        )
-        Log.i(TAG, "reminderDataItem: $reminderDataItem")
-        if(geofencingEvent.hasError()) {
-            val errorMessage = GeofenceStatusCodes.getStatusCodeString(geofencingEvent.errorCode)
-            Log.e(TAG, errorMessage)
-            return
-        }
+        //DONE_TODO: implement the onReceive method to receive the geofencing events at the background
+        GeofenceTransitionsJobIntentService.enqueueWork(context, intent)
 
-        // transition Type
-        val geofenceTransition = geofencingEvent.geofenceTransition
-
-        if(geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-            sendNotification(context, reminderDataItem)
-        }
     }
 }
