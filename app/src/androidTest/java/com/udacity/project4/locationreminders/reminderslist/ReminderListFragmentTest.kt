@@ -1,6 +1,5 @@
 package com.udacity.project4.locationreminders.reminderslist
 
-import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.NavController
@@ -15,7 +14,6 @@ import com.udacity.project4.R
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.core.IsNot.not
-import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -27,7 +25,8 @@ import org.mockito.Mockito.verify
 @MediumTest
 class ReminderListFragmentTest {
 
-//    TODO: test the navigation of the fragments.
+//    DONE_TODO: test the navigation of the fragments.
+
     @Test
     fun clickFab_navigateToAddReminder() = runBlockingTest {
         // On ReminderListFragment
@@ -43,24 +42,26 @@ class ReminderListFragmentTest {
         verify(navController).navigate(ReminderListFragmentDirections.toSaveReminder())
     }
 
-//    TODO: test the displayed data on the UI.
+//    DONE_TODO: test the displayed data on the UI.
     @Test
     fun reminderList_DisplayedData() = runBlockingTest {
-        val scenario = launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
-    var isReminderEmpty: Boolean = true
-        scenario.onFragment {
-            isReminderEmpty = it._viewModel.remindersList.value?.isNotEmpty() == true
-        }
+    val reminder = ReminderDataItem("title", "description", "location", 0.0, 0.0, "id")
+    val reminders: List<ReminderDataItem> = listOf(reminder)
 
-    if(isReminderEmpty) {
-        onView(withId(R.id.noDataTextView)).check(matches(not(isDisplayed())))
-    } else {
-        onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
+    val scenario = launchFragmentInContainer<ReminderListFragment>(Bundle(), R.style.AppTheme)
+    scenario.onFragment {
+        it._viewModel.remindersList.value = reminders
     }
 
+    onView(withId(R.id.noDataTextView)).check(matches(not(isDisplayed())))
+    onView(withId(R.id.title)).check(matches(isDisplayed()))
+    onView(withId(R.id.title)).check(matches(withText(reminder.title)))
+    onView(withId(R.id.description)).check(matches(isDisplayed()))
+    onView(withId(R.id.description)).check(matches(withText(reminder.description)))
     onView(withId(R.id.addReminderFAB)).check(matches(isDisplayed()))
 }
 
-//    TODO: add testing for the error messages.
+//    Don't_Know_What_TODO: add testing for the error messages.
+    //  No idea what error messages should I test because there are no "error contents" in ReminderListFragmentTest
 
 }
