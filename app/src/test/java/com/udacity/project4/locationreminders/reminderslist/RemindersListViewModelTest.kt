@@ -47,7 +47,7 @@ class RemindersListViewModelTest {
         stopKoin()
     }
 
-    //TODO: provide testing to the RemindersListViewModel and its live data objects
+    // DONE_TODO: provide testing to the RemindersListViewModel and its live data objects
 
     @Config(sdk = [Build.VERSION_CODES.O_MR1])
     @Test

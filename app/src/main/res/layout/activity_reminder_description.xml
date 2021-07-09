@@ -20,7 +20,7 @@
             android:gravity="center"
             android:orientation="vertical"
             tools:context=".locationreminders.ReminderDescriptionActivity">
-            <!--TODO: add the design of the reminder details-->
+            <!--DONE_TODO: add the design of the reminder details-->
 
             <TextView
                 android:id="@+id/text_arrived_at"

@@ -9,7 +9,7 @@ class FakeDataSource(private val reminders: List<ReminderDTO>? = listOf()) : Rem
 
     val TAG = "FakeDataSource"
 
-//    TODO: Create a fake data source to act as a double to the real data source
+//    DONE_TODO: Create a fake data source to act as a double to the real data source
 
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
         reminders?.let {
