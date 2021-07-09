@@ -1,16 +1,27 @@
 package com.udacity.project4
 
 import android.app.Application
+import android.content.Context
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
+import androidx.test.espresso.Espresso.onView
+import androidx.test.espresso.Espresso.pressBack
+import androidx.test.espresso.action.ViewActions.*
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.Matchers.`is`
 import org.junit.Before
+import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
@@ -65,7 +76,42 @@ class RemindersActivityTest :
         }
     }
 
+//    DONE_TODO: add End to End testing to the app
 
-//    TODO: add End to End testing to the app
+    @ExperimentalCoroutinesApi
+    @Test
+    fun totalTest() {
+        // Give a fake email as if the user logged in before
+        appContext.getSharedPreferences(RemindersActivity.PACKAGE_NAME, Context.MODE_PRIVATE)
+            .edit().putString(RemindersActivity.EMAIL, "FakeEmailForTest")
+            .apply()
 
+        // start activity
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+
+        // check if there is no data
+        onView(withId(R.id.noDataTextView)).check(matches(isDisplayed()))
+
+        onView(withId(R.id.addReminderFAB)).perform(click())
+        onView(withId(R.id.reminderTitle)).check(matches(isDisplayed()))
+        onView(withId(R.id.reminderDescription)).check(matches(isDisplayed()))
+        onView(withId(R.id.selectLocation)).check(matches(isDisplayed()))
+
+        onView(withId(R.id.reminderTitle)).perform(replaceText("Title"))
+        onView(withId(R.id.reminderDescription)).perform(replaceText("Description"))
+        onView(withId(R.id.selectLocation)).perform(click())
+        onView(withId(R.id.map)).check(matches(isDisplayed()))
+        pressBack()
+
+        onView(withId(R.id.reminderTitle)).check(matches(withText("Title")))
+        onView(withId(R.id.reminderDescription)).check(matches(withText("Description")))
+        pressBack()
+
+        onView(withId(R.id.logout)).check(matches(isDisplayed()))
+        onView(withId(R.id.logout)).perform(click())
+        val email = appContext.getSharedPreferences(RemindersActivity.PACKAGE_NAME, Context.MODE_PRIVATE)
+            .getString(RemindersActivity.EMAIL, "default")
+
+        assertThat(email, `is`(""))
+    }
 }
