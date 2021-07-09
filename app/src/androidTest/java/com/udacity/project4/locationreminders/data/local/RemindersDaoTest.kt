@@ -25,6 +25,56 @@ import org.junit.Test
 @SmallTest
 class RemindersDaoTest {
 
-//    TODO: Add testing implementation to the RemindersDao.kt
+//    DONE_TODO: Add testing implementation to the RemindersDao.kt
+    @get:Rule()
+    var instantExecutorRule = InstantTaskExecutorRule()
 
+    lateinit var database: RemindersDatabase
+
+    @Before
+    fun init() {
+        database = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(), RemindersDatabase::class.java)
+            .build()
+    }
+
+    @After
+    fun closeDb() {
+        database.close()
+    }
+
+    @Test
+    fun insertReminderAndGetById() = runBlockingTest {
+        // GIVEN - a reminder
+        val reminder = ReminderDTO("title", "description", "location", 0.0, 0.0, "id")
+
+        // WHEN - you save the reminder and receive a reminder with the same id
+        database.reminderDao().saveReminder(reminder)
+
+        val loaded = database.reminderDao().getReminderById("id")
+
+        // THEN - The received data should have expected values
+        assertThat(loaded as ReminderDTO, notNullValue())
+        assertThat(loaded.title, `is`(reminder.title))
+        assertThat(loaded.description, `is`(reminder.description))
+        assertThat(loaded.location, `is`(reminder.location))
+        assertThat(loaded.latitude, `is`(reminder.latitude))
+        assertThat(loaded.longitude, `is`(reminder.longitude))
+        assertThat(loaded.id, `is`(reminder.id))
+
+    }
+
+    @Test
+    fun insertReminderAndDeleteAll() = runBlockingTest {
+        // GIVEN - a reminder
+        val reminder = ReminderDTO("title", "description", "location", 0.0, 0.0, "id")
+
+        // WHEN - you save the reminder and delete all
+        database.reminderDao().saveReminder(reminder)
+        database.reminderDao().deleteAllReminders()
+
+        // THEN - The database should have no values
+        val result = database.reminderDao().getReminders().size
+        assertThat(result, `is`(0))
+    }
 }
