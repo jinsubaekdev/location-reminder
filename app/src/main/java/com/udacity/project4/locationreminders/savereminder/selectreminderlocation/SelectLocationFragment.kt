@@ -127,11 +127,6 @@ class SelectLocationFragment : BaseFragment() {
                 _viewModel.showSnackBar.value = "Error getting location settings resolution"
             }
         }
-        locationSettingsResponseTask.addOnCompleteListener {
-            if(it.isSuccessful) {
-                _viewModel.showSnackBar.value = "Getting location Success!!"
-            }
-        }
 
     }
 

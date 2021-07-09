@@ -69,8 +69,8 @@ class SaveReminderFragment : BaseFragment() {
 
             val reminderDataItem = ReminderDataItem(title, description, location, latitude, longitude)
 
-            _viewModel.validateAndSaveReminder(reminderDataItem)
             addGeofence(reminderDataItem)
+            validateAndSaveReminder(reminderDataItem)
 
 //            DONE_TODO: use the user entered reminder details to:
 //             1) add a geofencing request
@@ -91,6 +91,7 @@ class SaveReminderFragment : BaseFragment() {
 
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) {
+            _viewModel.showSnackBar.value = "Location Access should be permitted!"
             return
         } else if(title.isNullOrEmpty() || location.isNullOrEmpty()) {
             return
@@ -129,5 +130,13 @@ class SaveReminderFragment : BaseFragment() {
                 Log.i(TAG, "Adding Geofence Failed")
             }
         }
+
+    }
+
+    private fun validateAndSaveReminder(reminderDataItem: ReminderDataItem) {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            return
+
+        _viewModel.validateAndSaveReminder(reminderDataItem)
     }
 }

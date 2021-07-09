@@ -55,19 +55,16 @@ class RemindersActivity : AppCompatActivity() {
                 val authIntent = Intent(this, AuthenticationActivity::class.java)
                 startActivityForResult(authIntent, AUTH_REQUEST)
                 pref.edit().putString(EMAIL, "").apply()
-                Toast.makeText(this, "로그아웃 되었습니다", Toast.LENGTH_SHORT).show()
             }
         }
         return super.onOptionsItemSelected(item)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        Log.i("ReminderActivity", "onActivityResult 호출")
         super.onActivityResult(requestCode, resultCode, data)
         if(requestCode == AUTH_REQUEST && resultCode == Activity.RESULT_OK) {
             val email = data?.getStringExtra(EMAIL)
             pref.edit().putString(EMAIL, email).apply()
-            Toast.makeText(this, "$email 로그인 되었습니다", Toast.LENGTH_LONG).show()
             requestPermissions()
         } else {
             finish()
