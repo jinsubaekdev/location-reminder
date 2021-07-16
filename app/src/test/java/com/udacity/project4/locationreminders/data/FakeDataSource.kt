@@ -3,6 +3,7 @@ package com.udacity.project4.locationreminders.data
 import android.util.Log
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.data.dto.Result
+import kotlinx.coroutines.runBlocking
 
 //Use FakeDataSource that acts as a test double to the LocalDataSource
 class FakeDataSource(private val reminders: List<ReminderDTO>? = listOf()) : ReminderDataSource {
@@ -12,11 +13,14 @@ class FakeDataSource(private val reminders: List<ReminderDTO>? = listOf()) : Rem
 //    DONE_TODO: Create a fake data source to act as a double to the real data source
 
     override suspend fun getReminders(): Result<List<ReminderDTO>> {
-        reminders?.let {
-            return Result.Success(reminders)
-        }
+        return try {
+            if(reminders == null)
+                throw Exception("Reminders List is null")
 
-        return  Result.Error(message = "Reminders List is null")
+            Result.Success(reminders)
+        } catch (ex: Exception) {
+            Result.Error(ex.localizedMessage)
+        }
     }
 
     override suspend fun saveReminder(reminder: ReminderDTO) {
