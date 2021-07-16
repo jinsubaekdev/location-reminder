@@ -8,9 +8,11 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.action.ViewActions.*
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
+import androidx.test.rule.ActivityTestRule
 import com.udacity.project4.locationreminders.RemindersActivity
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
@@ -20,7 +22,9 @@ import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matchers.`is`
+import org.hamcrest.Matchers.not
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.koin.androidx.viewmodel.dsl.viewModel
@@ -43,6 +47,10 @@ class RemindersActivityTest :
      * As we use Koin as a Service Locator Library to develop our code, we'll also use Koin to test our code.
      * at this step we will initialize Koin related code to be able to use it in out testing.
      */
+
+    @get:Rule
+    val activityTestRule: ActivityTestRule<RemindersActivity> = ActivityTestRule(RemindersActivity::class.java)
+
     @Before
     fun init() {
         stopKoin()//stop the original app koin
@@ -96,18 +104,31 @@ class RemindersActivityTest :
         onView(withId(R.id.reminderTitle)).check(matches(isDisplayed()))
         onView(withId(R.id.reminderDescription)).check(matches(isDisplayed()))
         onView(withId(R.id.selectLocation)).check(matches(isDisplayed()))
+        onView(withId(R.id.saveReminder)).check(matches(isDisplayed()))
 
         onView(withId(R.id.reminderTitle)).perform(replaceText("Title"))
         onView(withId(R.id.reminderDescription)).perform(replaceText("Description"))
+        onView(withId(R.id.saveReminder)).perform(click())
+        onView(withId(com.google.android.material.R.id.snackbar_text)).check(matches(withText(R.string.select_location)))
+
+        Thread.sleep(3000)  // Waits until the snack bar is disappeared
         onView(withId(R.id.selectLocation)).perform(click())
         onView(withId(R.id.map)).check(matches(isDisplayed()))
-        pressBack()
 
+        onView(withId(R.id.button_save_location)).perform(click())
+        onView(withText(R.string.no_location_selected)).inRoot(withDecorView(not(`is`(activityTestRule.activity.window.decorView)))).check(matches(isDisplayed()))
+
+        onView(withId(R.id.map)).perform(click())
+        onView(withId(R.id.button_save_location)).perform(click())
         onView(withId(R.id.reminderTitle)).check(matches(withText("Title")))
         onView(withId(R.id.reminderDescription)).check(matches(withText("Description")))
-        pressBack()
 
+        onView(withId(R.id.saveReminder)).perform(click())
+        onView(withId(R.id.reminderCardView)).check(matches(isDisplayed()))
+        onView(withText("Title")).check(matches(withId(R.id.title)))
+        onView(withText("Description")).check(matches(withId(R.id.description)))
         onView(withId(R.id.logout)).check(matches(isDisplayed()))
+
         onView(withId(R.id.logout)).perform(click())
         val email = appContext.getSharedPreferences(RemindersActivity.PACKAGE_NAME, Context.MODE_PRIVATE)
             .getString(RemindersActivity.EMAIL, "default")
