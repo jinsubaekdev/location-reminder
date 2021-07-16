@@ -12,7 +12,7 @@ import com.google.android.gms.location.LocationSettingsRequest
 const val REQUEST_TURN_DEVICE_LOCATION_ON = 1
 private const val TAG = "LocationUtils"
 
-fun checkDeviceLocationSettings(activity: Activity) {
+fun checkDeviceLocationSettings(activity: Activity, completed: () -> Unit = {}) {
 
     val locationRequest = LocationRequest.create().apply {
         priority = LocationRequest.PRIORITY_LOW_POWER
@@ -29,6 +29,11 @@ fun checkDeviceLocationSettings(activity: Activity) {
             }
         } else {
             Log.d(TAG, "Error getting location settings resolution")
+        }
+    }
+    locationSettingsResponseTask.addOnCompleteListener {
+        if(it.isSuccessful) {
+            completed()
         }
     }
 

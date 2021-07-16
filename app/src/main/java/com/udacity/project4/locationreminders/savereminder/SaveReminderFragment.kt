@@ -96,44 +96,42 @@ class SaveReminderFragment : BaseFragment() {
             return
         }
 
-        checkDeviceLocationSettings(requireActivity())
+        checkDeviceLocationSettings(requireActivity()) {
+            val geofence = Geofence.Builder()
+                .setRequestId(requestId)
+                .setCircularRegion(
+                    _viewModel.latitude.value ?: 0.0,
+                    _viewModel.longitude.value ?: 0.0,
+                    100f
+                )
+                .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
+                .build()
 
+            val geofencingRequest = GeofencingRequest.Builder().apply {
+                setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                addGeofence(geofence)
+            }.build()
 
-        val geofence = Geofence.Builder()
-            .setRequestId(requestId)
-            .setCircularRegion(
-                _viewModel.latitude.value ?: 0.0,
-                _viewModel.longitude.value ?: 0.0,
-                100f
+            val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
+
+            val geofencePendingIntent: PendingIntent = PendingIntent.getBroadcast(
+                requireContext(),
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT
             )
-            .setExpirationDuration(Geofence.NEVER_EXPIRE)
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-            .build()
 
-        val geofencingRequest = GeofencingRequest.Builder().apply {
-            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-            addGeofence(geofence)
-        }.build()
-
-        val intent = Intent(requireContext(), GeofenceBroadcastReceiver::class.java)
-
-        val geofencePendingIntent: PendingIntent = PendingIntent.getBroadcast(
-            requireContext(),
-            0,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT
-        )
-
-        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
-            addOnSuccessListener {
-                Log.i(TAG, "Geofence Added!")
-                _viewModel.validateAndSaveReminder(reminderDataItem)
-            }
-            addOnFailureListener {
-                Log.i(TAG, "Adding Geofence Failed")
+            geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
+                addOnSuccessListener {
+                    Log.i(TAG, "Geofence Added!")
+                    _viewModel.validateAndSaveReminder(reminderDataItem)
+                }
+                addOnFailureListener {
+                    Log.i(TAG, "Adding Geofence Failed")
+                }
             }
         }
-
     }
 
 }
