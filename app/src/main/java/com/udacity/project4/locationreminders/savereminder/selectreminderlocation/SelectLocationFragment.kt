@@ -138,10 +138,6 @@ class SelectLocationFragment : BaseFragment() {
             Manifest.permission.WAKE_LOCK
         )
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            permissions += Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        }
-
         if(ContextCompat.checkSelfPermission(requireActivity(), permissions[0]) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(permissions, 0)
         }
