@@ -6,9 +6,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -40,8 +38,6 @@ class RemindersActivity : AppCompatActivity() {
         if(pref.getString(EMAIL, "").isNullOrEmpty()) {
             val authIntent = Intent(this, AuthenticationActivity::class.java)
             startActivityForResult(authIntent, AUTH_REQUEST)
-        } else {
-            requestPermissions()
         }
     }
 
@@ -65,22 +61,8 @@ class RemindersActivity : AppCompatActivity() {
         if(requestCode == AUTH_REQUEST && resultCode == Activity.RESULT_OK) {
             val email = data?.getStringExtra(EMAIL)
             pref.edit().putString(EMAIL, email).apply()
-            requestPermissions()
         } else {
             finish()
         }
-    }
-
-    private fun requestPermissions() {
-
-        val permissions = arrayOf(
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
-            Manifest.permission.INTERNET,
-            Manifest.permission.WAKE_LOCK
-        )
-            if(ContextCompat.checkSelfPermission(this, permissions[0]) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, permissions, 0)
-            }
     }
 }
