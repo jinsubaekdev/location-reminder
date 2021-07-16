@@ -1,16 +1,20 @@
 package com.udacity.project4.locationreminders.savereminder
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
 import com.google.android.gms.location.GeofencingRequest
@@ -38,7 +42,7 @@ class SaveReminderFragment : BaseFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_save_reminder, container, false)
 
@@ -84,11 +88,7 @@ class SaveReminderFragment : BaseFragment() {
         val location = reminderDataItem.location
         val requestId = reminderDataItem.id
 
-        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        ) {
-            _viewModel.showSnackBar.value = getString(R.string.location_required_error)
-            return
-        } else if(title.isNullOrEmpty()) {
+        if(title.isNullOrEmpty()) {
             _viewModel.showSnackBar.value = getString(R.string.select_title)
             return
         } else if(location.isNullOrEmpty()) {
@@ -96,6 +96,13 @@ class SaveReminderFragment : BaseFragment() {
             return
         }
 
+        val allPermissionsGranted = requestLocationPermissions()
+        if(!allPermissionsGranted) {
+            return
+        }
+
+        // Permissions are checked by requestLocationPermissions() function
+        @Suppress("MissingPermission")
         checkDeviceLocationSettings(requireActivity()) {
             val geofence = Geofence.Builder()
                 .setRequestId(requestId)
@@ -130,6 +137,43 @@ class SaveReminderFragment : BaseFragment() {
                 addOnFailureListener {
                     Log.i(TAG, "Adding Geofence Failed")
                 }
+            }
+        }
+    }
+
+    private fun requestLocationPermissions(): Boolean {
+        var permissions = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.WAKE_LOCK
+        )
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            permissions += Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        }
+
+        permissions.forEach { permission ->
+            if(ContextCompat.checkSelfPermission(requireActivity(), permission) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(permissions, 0)
+                return false
+            }
+        }
+
+        return true
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        val requiredPermission =
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            else Manifest.permission.ACCESS_FINE_LOCATION
+
+        for(i in permissions.indices) {
+            if(permissions[i] == requiredPermission && grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                _viewModel.showSnackBar.value = getString(R.string.permission_denied_explanation)
             }
         }
     }

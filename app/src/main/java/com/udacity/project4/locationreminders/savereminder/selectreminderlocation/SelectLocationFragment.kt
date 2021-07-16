@@ -2,12 +2,11 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -43,7 +42,7 @@ class SelectLocationFragment : BaseFragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_select_location, container, false)
 
@@ -60,7 +59,7 @@ class SelectLocationFragment : BaseFragment() {
             onLocationSelected()
         }
 
-        requestPermissions(requireActivity())
+        requestLocationPermissions()
 
         return binding.root
     }
@@ -132,18 +131,20 @@ class SelectLocationFragment : BaseFragment() {
         }
     }
 
-    private fun requestPermissions(activity: Activity) {
+    private fun requestLocationPermissions() {
 
-        val permissions = arrayOf(
+        var permissions = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             Manifest.permission.WAKE_LOCK
         )
-        if(ContextCompat.checkSelfPermission(activity, permissions[0]) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(permissions, 0)
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            permissions += Manifest.permission.ACCESS_BACKGROUND_LOCATION
         }
 
-        checkDeviceLocationSettings(activity)
+        if(ContextCompat.checkSelfPermission(requireActivity(), permissions[0]) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(permissions, 0)
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -152,11 +153,14 @@ class SelectLocationFragment : BaseFragment() {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if(requestCode == 0) {
-            if(grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                initLocation(requireContext(), googleMap)
-            } else {
-                _viewModel.showSnackBar.value = getString(R.string.permission_denied_explanation)
+        for(i in permissions.indices) {
+            if(permissions[i] == Manifest.permission.ACCESS_FINE_LOCATION) {
+                if(grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    checkDeviceLocationSettings(requireActivity())
+                    initLocation(requireContext(), googleMap)
+                } else {
+                    _viewModel.showSnackBar.value = getString(R.string.permission_denied_explanation)
+                }
             }
         }
     }
