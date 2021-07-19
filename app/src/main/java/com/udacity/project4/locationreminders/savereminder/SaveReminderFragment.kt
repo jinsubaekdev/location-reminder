@@ -122,17 +122,11 @@ class SaveReminderFragment : BaseFragment() {
             return
         }
 
-        val allPermissionsGranted = requestLocationPermissions()
-        if(!allPermissionsGranted) {
-            return
-        }
-
-
-        // Permissions are checked by requestLocationPermissions() function
+        requestLocationPermissions()
 
     }
 
-    private fun requestLocationPermissions(): Boolean {
+    private fun requestLocationPermissions() {
         var permissions = arrayOf(
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WAKE_LOCK
@@ -142,14 +136,7 @@ class SaveReminderFragment : BaseFragment() {
             permissions += Manifest.permission.ACCESS_BACKGROUND_LOCATION
         }
 
-        permissions.forEach { permission ->
-            if(ContextCompat.checkSelfPermission(requireActivity(), permission) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(permissions, 0)
-                return false
-            }
-        }
-
-        return true
+        requestPermissions(permissions, 0)
     }
 
     override fun onRequestPermissionsResult(
@@ -180,6 +167,8 @@ class SaveReminderFragment : BaseFragment() {
                         addGeofence(reminderDataItem)
                     }
                 }
+
+                break
             }
         }
     }
