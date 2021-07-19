@@ -1,29 +1,30 @@
 package com.udacity.project4.utils
 
-import android.app.Activity
 import android.content.IntentSender
 import android.util.Log
+import androidx.fragment.app.Fragment
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 
 
-const val REQUEST_TURN_DEVICE_LOCATION_ON = 1
+const val REQUEST_TURN_DEVICE_LOCATION_ON = 2
+
 private const val TAG = "LocationUtils"
 
-fun checkDeviceLocationSettings(activity: Activity, completed: () -> Unit = {}) {
+fun checkDeviceLocationSettings(fragment: Fragment, completed: () -> Unit = {}) {
 
     val locationRequest = LocationRequest.create().apply {
         priority = LocationRequest.PRIORITY_LOW_POWER
     }
     val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
-    val settingsClient = LocationServices.getSettingsClient(activity)
+    val settingsClient = LocationServices.getSettingsClient(fragment.requireActivity())
     val locationSettingsResponseTask = settingsClient.checkLocationSettings(builder.build())
     locationSettingsResponseTask.addOnFailureListener { exception ->
         if(exception is ResolvableApiException) {
             try {
-                exception.startResolutionForResult(activity, REQUEST_TURN_DEVICE_LOCATION_ON)
+                fragment.startIntentSenderForResult(exception.resolution.intentSender, REQUEST_TURN_DEVICE_LOCATION_ON, null, 0, 0, 0, null)
             } catch (sendEx: IntentSender.SendIntentException) {
                 Log.d(TAG, "Error getting location settings resolution: " + sendEx.message)
             }

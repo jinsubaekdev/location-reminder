@@ -2,11 +2,14 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -17,11 +20,14 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.MapsInitializer
 import com.google.android.gms.maps.model.*
+import com.google.android.gms.tasks.Task
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSelectLocationBinding
+import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
+import com.udacity.project4.utils.REQUEST_TURN_DEVICE_LOCATION_ON
 import com.udacity.project4.utils.checkDeviceLocationSettings
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
@@ -76,7 +82,6 @@ class SelectLocationFragment : BaseFragment() {
         _viewModel.latitude.value = selectedPoi.latLng.latitude
         _viewModel.longitude.value = selectedPoi.latLng.longitude
         _viewModel.navigationCommand.value = NavigationCommand.Back
-
     }
 
     private fun initMap(savedInstanceState: Bundle?) {
@@ -138,9 +143,7 @@ class SelectLocationFragment : BaseFragment() {
             Manifest.permission.WAKE_LOCK
         )
 
-        if(ContextCompat.checkSelfPermission(requireActivity(), permissions[0]) != PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(permissions, 0)
-        }
+        requestPermissions(permissions, 0)
     }
 
     override fun onRequestPermissionsResult(
@@ -152,8 +155,7 @@ class SelectLocationFragment : BaseFragment() {
         for(i in permissions.indices) {
             if(permissions[i] == Manifest.permission.ACCESS_FINE_LOCATION) {
                 if(grantResults[i] == PackageManager.PERMISSION_GRANTED) {
-                    checkDeviceLocationSettings(requireActivity())
-                    initLocation(requireContext(), googleMap)
+                    checkDeviceLocationSettings(this)
                 } else {
                     _viewModel.showSnackBar.value = getString(R.string.permission_denied_explanation)
                 }
@@ -184,5 +186,4 @@ class SelectLocationFragment : BaseFragment() {
         }
         else -> super.onOptionsItemSelected(item)
     }
-
 }

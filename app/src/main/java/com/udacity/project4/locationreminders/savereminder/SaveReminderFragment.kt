@@ -1,6 +1,7 @@
 package com.udacity.project4.locationreminders.savereminder
 
 import android.Manifest
+import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -10,7 +11,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
@@ -22,6 +22,7 @@ import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
 import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
+import com.udacity.project4.utils.REQUEST_TURN_DEVICE_LOCATION_ON
 import com.udacity.project4.utils.checkDeviceLocationSettings
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import org.koin.android.ext.android.inject
@@ -73,7 +74,17 @@ class SaveReminderFragment : BaseFragment() {
     }
 
     @Suppress("MissingPermission")
-    private fun addGeofence(reminderDataItem: ReminderDataItem) {
+    private fun addGeofence() {
+        val title = _viewModel.reminderTitle.value
+        val description = _viewModel.reminderDescription.value
+        val location = _viewModel.reminderSelectedLocationStr.value
+        val latitude = _viewModel.latitude.value
+        val longitude = _viewModel.longitude.value
+
+        val reminderDataItem =
+            ReminderDataItem(title, description, location, latitude, longitude)
+
+
         val geofence = Geofence.Builder()
             .setRequestId(reminderDataItem.id)
             .setCircularRegion(
@@ -155,16 +166,8 @@ class SaveReminderFragment : BaseFragment() {
                     _viewModel.showSnackBar.value =
                         getString(R.string.permission_denied_explanation)
                 } else {
-                    val title = _viewModel.reminderTitle.value
-                    val description = _viewModel.reminderDescription.value
-                    val location = _viewModel.reminderSelectedLocationStr.value
-                    val latitude = _viewModel.latitude.value
-                    val longitude = _viewModel.longitude.value
-
-                    val reminderDataItem =
-                        ReminderDataItem(title, description, location, latitude, longitude)
-                    checkDeviceLocationSettings(requireActivity()) {
-                        addGeofence(reminderDataItem)
+                    checkDeviceLocationSettings(this) {
+                        addGeofence()
                     }
                 }
 
@@ -172,5 +175,13 @@ class SaveReminderFragment : BaseFragment() {
             }
         }
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == REQUEST_TURN_DEVICE_LOCATION_ON && resultCode == Activity.RESULT_OK) {
+            addGeofence()
+        }
+    }
+
 
 }

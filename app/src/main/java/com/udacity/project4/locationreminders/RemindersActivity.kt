@@ -1,15 +1,12 @@
 package com.udacity.project4.locationreminders
 
-import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.SharedPreferences
-import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import com.udacity.project4.R
 import com.udacity.project4.authentication.AuthenticationActivity
@@ -61,7 +58,7 @@ class RemindersActivity : AppCompatActivity() {
         if(requestCode == AUTH_REQUEST && resultCode == Activity.RESULT_OK) {
             val email = data?.getStringExtra(EMAIL)
             pref.edit().putString(EMAIL, email).apply()
-        } else {
+        } else if(resultCode == RESULT_CANCELED){
             finish()
         }
     }
